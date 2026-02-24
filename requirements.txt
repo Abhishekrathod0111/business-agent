@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+ollama
+sentence-transformers
+faiss-cpu
+numpy
+requests
+beautifulsoup4
+lxml
+ddgs
+jinja2
+pydantic

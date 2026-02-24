@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Business Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+<style>
+
+.spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+button:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
+
+body {
+    display: flex;
+}
+
+.sidebar {
+    width: 250px;
+    background: #111;
+    padding: 20px;
+}
+
+.sidebar button {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #222;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.sidebar button:hover {
+    background: #333;
+}
+
+
+</style>
+<div class="max-w-4xl mx-auto p-8">
+    <h1 class="text-3xl font-bold mb-6">Autonomous Business Intelligence Agent</h1>
+
+    <div class="flex gap-4 mb-6">
+        <input id="companyInput"
+               class="flex-1 p-3 border rounded-lg"
+               placeholder="Enter company name..." />
+        <button id="analyzeBtn" onclick="analyzeCompany()">Analyze</button>
+    </div>
+
+    <div id="result" class="space-y-6"></div>
+</div>
+<div class="sidebar">
+    <h3>Memory History</h3>
+    <div id="history-list"></div>
+</div>
+<script>
+async function analyzeCompany() {
+
+    const company = document.getElementById("companyInput").value.trim();
+    const resultDiv = document.getElementById("result");
+    const button = document.getElementById("analyzeBtn");
+
+    if (!company) {
+        resultDiv.innerHTML = "<p style='color:red;'>Please enter a company name.</p>";
+        return;
+    }
+
+    // Disable button
+    button.disabled = true;
+    button.innerText = "Analyzing...";
+
+    // Show loading spinner
+    resultDiv.innerHTML = `
+        <div class="spinner"></div>
+        <p>Analyzing ${company}...</p>
+    `;
+
+    try {
+
+        const response = await fetch(`/analyze?company=${company}`);
+
+        if (!response.ok) {
+            throw new Error("Server error");
+        }
+
+        const data = await response.json();
+
+        const result = data.result;
+        const analysis = result.analysis;
+        const decision = result.decision;
+
+        resultDiv.innerHTML = `
+            <h2>${analysis.company}</h2>
+
+            <h3>Summary</h3>
+            <p>${analysis.summary}</p>
+
+            <h3>Strengths</h3>
+            <ul>${analysis.strengths.map(s => `<li>${s}</li>`).join("")}</ul>
+
+            <h3>Weaknesses</h3>
+            <ul>${analysis.weaknesses.map(w => `<li>${w}</li>`).join("")}</ul>
+
+            <h3>Competitors</h3>
+            <ul>${analysis.competitors.map(c => `<li>${c}</li>`).join("")}</ul>
+
+            <h2>Decision</h2>
+
+            <div>
+                <b>Investment Recommendation:</b> ${decision.investment_recommendation}<br>
+                <b>Risk Level:</b> ${decision.risk_level}<br>
+                <b>Market Position:</b> ${decision.market_position}<br>
+                <b>Reasoning:</b> ${decision.reasoning}
+            </div>
+
+            <small>Source: ${data.source}</small>
+        `;
+        // Refresh memory history sidebar
+        loadHistory();
+
+    } catch (error) {
+
+        resultDiv.innerHTML = `
+            <p style="color:red;">
+                Error analyzing company. Please try again.
+            </p>
+        `;
+
+    } finally {
+
+        // Re-enable button
+        button.disabled = false;
+        button.innerText = "Analyze";
+    }
+}
+
+
+async function loadHistory() {
+
+    const response = await fetch("/history");
+    const data = await response.json();
+
+    const historyDiv = document.getElementById("history-list");
+
+    historyDiv.innerHTML = "";
+
+    data.companies.forEach(company => {
+
+        const btn = document.createElement("button");
+
+        btn.innerText = company;
+
+        btn.onclick = () => {
+            document.getElementById("companyInput").value = company;
+            analyzeCompany();
+        };
+
+        historyDiv.appendChild(btn);
+
+    });
+}
+
+loadHistory();
+</script>
+
+</body>
+</html>
