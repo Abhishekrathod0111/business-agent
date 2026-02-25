@@ -12,6 +12,19 @@ This project demonstrates production-grade AI system design without relying on p
 
 ---
 
+## UI Preview
+
+### Home Screen
+![Home Screen](screenshots/ui.png)
+
+### Analysis Result
+![Analysis Result](screenshots/analysis.png)
+
+### Memory Sidebar
+![Memory Sidebar](screenshots/memory.png)
+
+---
+
 ## Features
 
 - Multi-Agent Architecture
